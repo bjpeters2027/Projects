@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MPI-PSL Family Data Comparison</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+{% macro color_for(value) -%}
+    {%- if value == "Good" -%}
+        bg-green-500
+    {%- elif value == "Normal" -%}
+        bg-yellow-500
+    {%- elif value == "Poor" -%}
+        bg-red-500
+    {%- elif value == "Very Poor" -%}
+        bg-red-700
+    {%- elif value == "Vulnerable" -%}
+        bg-red-900
+    {%- else -%}
+        bg-gray-500
+    {%- endif -%}
+{%- endmacro %} 
+
+<body class="bg-gray-100">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-center mb-8">Family Data Comparison</h1>
+    
+    <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow">
+      <form method="post" class="space-y-4">
+        <div>
+          <label for="key" class="block text-lg font-medium text-gray-700">
+            Enter an MPI Family Key (for example, 10001):
+          </label>
+          <input type="text" id="key" name="key" value="{{ key or '' }}" required
+                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        </div>
+        <button type="submit" class="w-full bg-[#4CA948] text-white py-2 px-4 rounded hover:bg-[#449c42] transition">
+          Compare
+        </button>
+      </form>
+    </div>
+
+    {% if error %}
+      <div class="mt-4 max-w-xl mx-auto">
+        <p class="text-red-500 font-medium">{{ error }}</p>
+      </div>
+    {% endif %}
+
+    {% if result %}
+      <div class="mt-8 max-w-4xl mx-auto space-y-6">
+        <div class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-2xl font-semibold mb-4">Attribute Comparison</h2>
+          <p class="mb-4">
+            <span class="font-semibold">MPI Label:</span>
+            <span class="text-indigo-600">{{ result.mpi_label }}</span>
+          </p>
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Attribute</th>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">MPI Value</th>
+                <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">PSL Value</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              {% for attr in ['education','electricity','sanitation','water','housing','assets'] %}
+
+                {% set mpi_color = color_for(result.mpi_attributes[attr]) %}
+                {% set comp_color = color_for(result.comp_attributes[attr]) %}
+            
+                <tr>
+                    <td class="px-4 py-2 text-gray-800">{{ attr.capitalize() }}</td>
+                    <td class="px-4 py-2 text-gray-800 {{ mpi_color }}">{{ result.mpi_attributes[attr] }}</td>
+                    <td class="px-4 py-2 text-grey-800 {{ comp_color }}">{{ result.comp_attributes[attr] }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-2xl font-semibold mb-4">Descriptions</h2>
+          <div class="mb-4">
+            <details class="group border border-gray-200 rounded-lg p-4">
+              <summary class="cursor-pointer text-lg font-medium text-gray-700">
+                MPI Description
+              </summary>
+              <div class="mt-2 text-gray-800">
+                {{ result.mpi_description }}
+              </div>
+            </details>
+          </div>
+          <div>
+            <details class="group border border-gray-200 rounded-lg p-4">
+              <summary class="cursor-pointer text-lg font-medium text-gray-700">
+                PSL Description
+              </summary>
+              <div class="mt-2 text-gray-800">
+                {{ result.comp_description }}
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
